@@ -2,6 +2,7 @@ package com.jalmansa.meepchallenge.service.apiconsumer.impl;
 
 import java.text.MessageFormat;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.jalmansa.meepchallenge.domain.AvailableVehicles;
 import com.jalmansa.meepchallenge.domain.VehicleResource;
+import com.jalmansa.meepchallenge.domain.Vehicles;
 import com.jalmansa.meepchallenge.service.apiconsumer.ApiConsumer;
 import com.jalmansa.meepchallenge.service.apiconsumer.ApiProperties;
 
@@ -37,10 +38,14 @@ public class ApiConsumerImpl implements ApiConsumer {
     }
 
     @Override
-    public AvailableVehicles execute() {
+    public Vehicles execute() {
         validateParams();
         ResponseEntity<VehicleResource[]> response = perfomApiCall();
-        return AvailableVehicles.of(response.getBody());
+        VehicleResource[] responseBody = Optional
+                .ofNullable(response)
+                .map(ResponseEntity::getBody)
+                .orElse(null);
+        return Vehicles.of(responseBody);
     }
 
     private ResponseEntity<VehicleResource[]> perfomApiCall() {

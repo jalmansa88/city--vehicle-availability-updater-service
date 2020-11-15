@@ -13,15 +13,15 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class AvailableVehicles {
+public class Vehicles {
 
     private Set<VehicleResource> vehicles;
 
-    public static AvailableVehicles of(VehicleResource[] vehiclesArray) {
+    public static Vehicles of(VehicleResource[] vehiclesArray) {
         if (Objects.isNull(vehiclesArray)) {
             vehiclesArray = new VehicleResource[0];
         }
-        return AvailableVehicles
+        return Vehicles
                 .builder()
                 .vehicles(Sets.newHashSet(vehiclesArray))
                 .build();
@@ -31,7 +31,7 @@ public class AvailableVehicles {
         return CollectionUtils.isEmpty(vehicles);
     }
 
-    public Optional<VehicleResource> getVehicleById(String id) {
+    public Optional<VehicleResource> findVehicleById(String id) {
         return vehicles.stream()
             .filter(vehicle -> vehicle.getId().equals(id))
             .findFirst();

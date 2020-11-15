@@ -1,7 +1,7 @@
 package com.jalmansa.meepchallenge.service.apiconsumer;
 
-import com.jalmansa.meepchallenge.domain.AvailableVehicles;
+import com.jalmansa.meepchallenge.domain.Vehicles;
 
 public interface ApiConsumer {
-    public AvailableVehicles execute();
+    public Vehicles execute();
 }

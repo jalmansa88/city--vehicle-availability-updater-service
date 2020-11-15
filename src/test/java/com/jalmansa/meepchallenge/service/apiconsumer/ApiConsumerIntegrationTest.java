@@ -2,12 +2,16 @@ package com.jalmansa.meepchallenge.service.apiconsumer;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
 
 import org.apache.commons.validator.routines.UrlValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,8 +21,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 
 import com.jalmansa.meepchallenge.cron.task.CronTask;
-import com.jalmansa.meepchallenge.domain.AvailableVehicles;
 import com.jalmansa.meepchallenge.domain.VehicleResource;
+import com.jalmansa.meepchallenge.domain.Vehicles;
 import com.jalmansa.meepchallenge.service.apiconsumer.impl.ApiConsumerImpl;
 
 @ActiveProfiles("test")
@@ -44,15 +48,24 @@ class ApiConsumerIntegrationTest {
     }
 
     @Test
-    void apiCallTest() {
-        String url = "https://apidev.meep.me/tripplan/api/v1/routers/lisboa/resources?upperRightLatLon=38.739429,-9.137115&companyZoneIds=545,467,473&lowerLeftLatLon=38.711046,-9.160096";
-        VehicleResource[] dataResponse = {buildVehicleResource()};
-        when(restTemplate.getForEntity(url, VehicleResource[].class)).thenReturn(ResponseEntity.ok(dataResponse));
+    void shouldPerfomApiCallAndReturnAValue() {
+        VehicleResource[] dataResponse = { buildVehicleResource() };
+        when(restTemplate.getForEntity(Mockito.anyString(), Mockito.eq(VehicleResource[].class)))
+                .thenReturn(ResponseEntity.ok(dataResponse));
 
-        AvailableVehicles vehicles = apiConsumer.execute();
+        Vehicles vehicles = apiConsumer.execute();
+
+        Mockito.verify(restTemplate, times(1)).getForEntity(
+                Mockito.argThat((String s) -> List.of(
+                        "apidev.meep.me",
+                        "lisboa",
+                        "upperRightLatLon=38.739429,-9.137115",
+                        "companyZoneIds=545,467,473",
+                        "lowerLeftLatLon=38.711046,-9.160096").stream().allMatch(s::contains)),
+                Mockito.eq(VehicleResource[].class));
         assertNotNull(vehicles);
         assertFalse(vehicles.isEmpty());
-        assertNotNull(vehicles.getVehicleById("PT-LIS-A00404"));
+        assertNotNull(vehicles.findVehicleById("PT-LIS-A00404"));
     }
 
     private VehicleResource buildVehicleResource() {
