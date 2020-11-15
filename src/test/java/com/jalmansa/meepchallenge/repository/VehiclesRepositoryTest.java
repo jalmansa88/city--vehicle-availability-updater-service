@@ -1,32 +1,35 @@
-package com.jalmansa.meepchallenge.domain;
+package com.jalmansa.meepchallenge.repository;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.HashSet;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class VehiclesTest {
+import com.jalmansa.meepchallenge.domain.VehicleResource;
+import com.jalmansa.meepchallenge.domain.Vehicles;
+import com.jalmansa.meepchallenge.repository.impl.VehiclesRepositoryImpl;
 
-    @Test
-    void shouldInstanciateWithNoVehicles_whenEmptyArray() {
-        Vehicles vehicles = Vehicles.of(new VehicleResource[0]);
-        assertNotNull(vehicles);
-        assertTrue(vehicles.isEmpty());
-    }
-    @Test
-    void shouldInstanciateWithNoVehicles_whenEmptySet() {
-        Vehicles vehicles = Vehicles.of(new HashSet<>());
-        assertNotNull(vehicles);
-        assertTrue(vehicles.isEmpty());
+class VehiclesRepositoryTest {
+
+    private VehiclesRepository repo;
+
+    @BeforeEach
+    void setUp() {
+        repo = new VehiclesRepositoryImpl();
     }
 
     @Test
-    void shouldInstanciateAndFindResourceById() {
+    void shouldReadFromFile() {
+        Vehicles current = repo.loadCurrent();
+        assertNotNull(current);
+    }
+
+    @Test
+    void shouldWriteFile() {
         VehicleResource[] dataResponse = { buildVehicleResource() };
         Vehicles vehicles = Vehicles.of(dataResponse);
-        assertNotNull(vehicles.findVehicleById("PT-LIS-A00404"));
+
+        repo.save(vehicles);
     }
 
     private VehicleResource buildVehicleResource() {

@@ -2,7 +2,11 @@ package com.jalmansa.meepchallenge.service.apiconsumer;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -11,7 +15,6 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -50,19 +53,19 @@ class ApiConsumerIntegrationTest {
     @Test
     void shouldPerfomApiCallAndReturnAValue() {
         VehicleResource[] dataResponse = { buildVehicleResource() };
-        when(restTemplate.getForEntity(Mockito.anyString(), Mockito.eq(VehicleResource[].class)))
+        when(restTemplate.getForEntity(anyString(), eq(VehicleResource[].class)))
                 .thenReturn(ResponseEntity.ok(dataResponse));
 
         Vehicles vehicles = apiConsumer.execute();
 
-        Mockito.verify(restTemplate, times(1)).getForEntity(
-                Mockito.argThat((String s) -> List.of(
+        verify(restTemplate, times(1)).getForEntity(
+                argThat((String s) -> List.of(
                         "apidev.meep.me",
                         "lisboa",
                         "upperRightLatLon=38.739429,-9.137115",
                         "companyZoneIds=545,467,473",
                         "lowerLeftLatLon=38.711046,-9.160096").stream().allMatch(s::contains)),
-                Mockito.eq(VehicleResource[].class));
+                eq(VehicleResource[].class));
         assertNotNull(vehicles);
         assertFalse(vehicles.isEmpty());
         assertNotNull(vehicles.findVehicleById("PT-LIS-A00404"));

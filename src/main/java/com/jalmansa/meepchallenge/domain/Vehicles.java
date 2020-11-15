@@ -1,47 +1,70 @@
 package com.jalmansa.meepchallenge.domain;
 
-import java.util.Objects;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Sets;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @Builder
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
 public class Vehicles {
 
-    private Set<VehicleResource> vehicles;
+    private Set<VehicleResource> availableVehicles;
 
     public static Vehicles of(VehicleResource[] vehiclesArray) {
-        if (Objects.isNull(vehiclesArray)) {
-            vehiclesArray = new VehicleResource[0];
-        }
+        HashSet<VehicleResource> set = Optional.ofNullable(vehiclesArray)
+            .map(Sets::newHashSet)
+            .orElseGet(HashSet::new);
+
+        return of(set);
+    }
+
+    public static Vehicles of(Set<VehicleResource> vehicles) {
+        Set<VehicleResource> set = Optional.ofNullable(vehicles)
+                .orElseGet(HashSet::new);
+
         return Vehicles
                 .builder()
-                .vehicles(Sets.newHashSet(vehiclesArray))
+                .availableVehicles(set)
                 .build();
     }
 
+    @JsonIgnore
     public boolean isEmpty() {
-        return CollectionUtils.isEmpty(vehicles);
+        return CollectionUtils.isEmpty(availableVehicles);
     }
 
     public Optional<VehicleResource> findVehicleById(String id) {
-        return vehicles.stream()
+        return availableVehicles.stream()
             .filter(vehicle -> vehicle.getId().equals(id))
             .findFirst();
     }
 
+    public boolean isAvailable(VehicleResource resource) {
+        return availableVehicles.contains(resource);
+    }
+
     @Override
     public String toString() {
-        return vehicles
+        return availableVehicles
                 .stream()
                 .map(VehicleResource::toString)
-                .reduce("", String::concat);
+                .collect(Collectors.joining(","));
     }
 }

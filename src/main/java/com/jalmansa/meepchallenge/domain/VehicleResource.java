@@ -6,11 +6,9 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Getter
 @Builder
-@ToString
 @EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
@@ -28,4 +26,9 @@ public class VehicleResource {
     private boolean realTimeData;
     private String resourceType;
     private int companyZoneId;
+
+    @Override
+    public String toString() {
+        return id;
+    }
 }
