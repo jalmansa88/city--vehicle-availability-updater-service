@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.jalmansa.meepchallenge.exception.UnexpectedApiResponseException;
 import com.jalmansa.meepchallenge.service.vehiclesupdater.CityVehiclesUpdaterService;
 
 @Component
@@ -13,7 +14,7 @@ public class CronTask {
     private CityVehiclesUpdaterService service;
 
     @Scheduled(cron = "${task.cron.expresion}")
-    public void task() {
+    public void task() throws UnexpectedApiResponseException {
         service.execute();
     }
 }

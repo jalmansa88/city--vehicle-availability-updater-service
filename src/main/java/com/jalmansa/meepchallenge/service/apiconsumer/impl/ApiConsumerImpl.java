@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -17,6 +18,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.jalmansa.meepchallenge.domain.VehicleResource;
 import com.jalmansa.meepchallenge.domain.Vehicles;
+import com.jalmansa.meepchallenge.exception.UnexpectedApiResponseException;
 import com.jalmansa.meepchallenge.service.apiconsumer.ApiConsumer;
 import com.jalmansa.meepchallenge.service.apiconsumer.ApiProperties;
 
@@ -38,13 +40,18 @@ public class ApiConsumerImpl implements ApiConsumer {
     }
 
     @Override
-    public Vehicles execute() {
+    public Vehicles execute() throws UnexpectedApiResponseException {
         validateParams();
         ResponseEntity<VehicleResource[]> response = perfomApiCall();
+
+        if(response.getStatusCode() != HttpStatus.OK) {
+            throw new UnexpectedApiResponseException("API returned an unexpected response. Skipping update");
+        }
+
         VehicleResource[] responseBody = Optional
                 .ofNullable(response)
                 .map(ResponseEntity::getBody)
-                .orElse(null);
+                .orElse(new VehicleResource[0]);
         return Vehicles.of(responseBody);
     }
 

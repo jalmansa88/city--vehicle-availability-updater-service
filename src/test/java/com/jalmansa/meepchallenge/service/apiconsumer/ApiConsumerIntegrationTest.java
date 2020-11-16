@@ -2,6 +2,7 @@ package com.jalmansa.meepchallenge.service.apiconsumer;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -19,6 +20,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
@@ -26,6 +28,7 @@ import org.springframework.web.client.RestTemplate;
 import com.jalmansa.meepchallenge.cron.task.CronTask;
 import com.jalmansa.meepchallenge.domain.VehicleResource;
 import com.jalmansa.meepchallenge.domain.Vehicles;
+import com.jalmansa.meepchallenge.exception.UnexpectedApiResponseException;
 import com.jalmansa.meepchallenge.service.apiconsumer.impl.ApiConsumerImpl;
 
 @ActiveProfiles("test")
@@ -51,7 +54,7 @@ class ApiConsumerIntegrationTest {
     }
 
     @Test
-    void shouldPerfomApiCallAndReturnAValue() {
+    void shouldPerfomApiCallAndReturnAValue() throws UnexpectedApiResponseException {
         VehicleResource[] dataResponse = { buildVehicleResource() };
         when(restTemplate.getForEntity(anyString(), eq(VehicleResource[].class)))
                 .thenReturn(ResponseEntity.ok(dataResponse));
@@ -69,6 +72,14 @@ class ApiConsumerIntegrationTest {
         assertNotNull(vehicles);
         assertFalse(vehicles.isEmpty());
         assertNotNull(vehicles.findVehicleById("PT-LIS-A00404"));
+    }
+
+    @Test
+    void exception() {
+        when(restTemplate.getForEntity(anyString(), eq(VehicleResource[].class)))
+                .thenReturn(new ResponseEntity<VehicleResource[]>(new VehicleResource[0], HttpStatus.INTERNAL_SERVER_ERROR));
+
+        assertThrows(UnexpectedApiResponseException.class, () -> apiConsumer.execute());
     }
 
     private VehicleResource buildVehicleResource() {

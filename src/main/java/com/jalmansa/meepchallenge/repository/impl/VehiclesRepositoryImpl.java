@@ -51,18 +51,19 @@ public class VehiclesRepositoryImpl implements VehiclesRepository {
         FileWriter file = null;
         Resource resource = new ClassPathResource("vehicles.json");
         try {
-            file = new FileWriter(resource.getFile().getAbsolutePath());
+            file = new FileWriter(resource.getFile().toPath().toString());
             String json = mapper.writeValueAsString(vehicles);
 
             file.write(json);
             file.flush();
+            file.close();
         } catch (IOException e) {
             log.error("Error while writing objet to file");
         } finally {
             try {
                 file.close();
             } catch (IOException e) {
-                log.error("Error while closing objet to file");
+                log.error("Error while writing objet to file");
             }
         }
 

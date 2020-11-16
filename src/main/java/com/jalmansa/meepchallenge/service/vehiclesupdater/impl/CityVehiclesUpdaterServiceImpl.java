@@ -9,6 +9,7 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.jalmansa.meepchallenge.domain.VehicleResource;
 import com.jalmansa.meepchallenge.domain.Vehicles;
+import com.jalmansa.meepchallenge.exception.UnexpectedApiResponseException;
 import com.jalmansa.meepchallenge.repository.VehiclesRepository;
 import com.jalmansa.meepchallenge.service.apiconsumer.ApiConsumer;
 import com.jalmansa.meepchallenge.service.vehiclesupdater.CityVehiclesUpdaterService;
@@ -33,7 +34,7 @@ public class CityVehiclesUpdaterServiceImpl implements CityVehiclesUpdaterServic
     }
 
     @Override
-    public void execute() {
+    public void execute() throws UnexpectedApiResponseException {
         Vehicles vehiclesResponse = apiConsumer.execute();
 
         if (isNull(currentVehicles)) {
