@@ -34,6 +34,7 @@ public class VehiclesRepositoryImpl implements VehiclesRepository {
         Vehicles output = null;
         try {
             resource = new ClassPathResource("vehicles.json").getFile();
+            log.info("loading file " + resource.toPath().toString());
             String vehiclesJson = new String(Files.readAllBytes(resource.toPath()));
 
             output = mapper.readValue(vehiclesJson, Vehicles.class);
@@ -57,6 +58,7 @@ public class VehiclesRepositoryImpl implements VehiclesRepository {
             file.write(json);
             file.flush();
             file.close();
+            log.info("Persisted into file " + resource.getFile().toPath().toString());
         } catch (IOException e) {
             log.error("Error while writing objet to file");
         } finally {

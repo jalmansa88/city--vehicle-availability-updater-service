@@ -9,6 +9,7 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.jalmansa.meepchallenge.domain.VehicleResource;
 import com.jalmansa.meepchallenge.domain.Vehicles;
+import com.jalmansa.meepchallenge.domain.VehiclesDifference;
 import com.jalmansa.meepchallenge.exception.UnexpectedApiResponseException;
 import com.jalmansa.meepchallenge.repository.VehiclesRepository;
 import com.jalmansa.meepchallenge.service.apiconsumer.ApiConsumer;
@@ -34,7 +35,9 @@ public class CityVehiclesUpdaterServiceImpl implements CityVehiclesUpdaterServic
     }
 
     @Override
-    public void execute() throws UnexpectedApiResponseException {
+    public VehiclesDifference execute() throws UnexpectedApiResponseException {
+        VehiclesDifference difference = null;
+
         Vehicles vehiclesResponse = apiConsumer.execute();
 
         if (isNull(currentVehicles)) {
@@ -46,11 +49,16 @@ public class CityVehiclesUpdaterServiceImpl implements CityVehiclesUpdaterServic
         } else {
             log.info("A NEW SET of vehicles is available");
 
-            SetView<VehicleResource> oldResources = Sets.difference(currentVehicles.getAvailableVehicles(), vehiclesResponse.getAvailableVehicles());
-            SetView<VehicleResource> newResources = Sets.difference(vehiclesResponse.getAvailableVehicles(), currentVehicles.getAvailableVehicles());
+            SetView<VehicleResource> oldResources = Sets.difference(currentVehicles.getVehicles(), vehiclesResponse.getVehicles());
+            SetView<VehicleResource> newResources = Sets.difference(vehiclesResponse.getVehicles(), currentVehicles.getVehicles());
 
             Vehicles noLongAvailable = Vehicles.of(oldResources);
             Vehicles newVehicles = Vehicles.of(newResources);
+
+            difference = VehiclesDifference.builder()
+                    .newAvailable(newVehicles)
+                    .noLongerAvailable(noLongAvailable)
+                    .build();
 
             log.info("No longer available vehicles: " + noLongAvailable.toString());
             log.info("New available vehicles: " + newVehicles.toString());
@@ -58,7 +66,8 @@ public class CityVehiclesUpdaterServiceImpl implements CityVehiclesUpdaterServic
         }
         currentVehicles = vehiclesResponse;
         repo.save(currentVehicles);
-        log.info("Persisted new set of vehicles into vehicles.json file");
+
+        return difference;
     }
 
 }

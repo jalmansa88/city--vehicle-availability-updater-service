@@ -1,5 +1,7 @@
 package com.jalmansa.meepchallenge.service.vehiclesupdater;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.jalmansa.meepchallenge.domain.VehicleResource;
 import com.jalmansa.meepchallenge.domain.Vehicles;
+import com.jalmansa.meepchallenge.domain.VehiclesDifference;
 import com.jalmansa.meepchallenge.exception.UnexpectedApiResponseException;
 import com.jalmansa.meepchallenge.repository.VehiclesRepository;
 import com.jalmansa.meepchallenge.service.apiconsumer.ApiConsumer;
@@ -43,10 +46,29 @@ class CityVehiclesUpdaterServiceTest {
 
         when(apiConsumer.execute()).thenReturn(newVehicles);
 
-        service.execute();
+        VehiclesDifference vehiclesDifference = service.execute();
 
         verify(apiConsumer, times(1)).execute();
         verify(repo, times(1)).save(newVehicles);
+        assertEquals(1, vehiclesDifference.getNewAvailable().getVehicles().size());
+        assertEquals(1, vehiclesDifference.getNoLongerAvailable().getVehicles().size());
+
+        VehicleResource newResource = vehiclesDifference
+            .getNewAvailable()
+            .getVehicles()
+            .stream().filter(v -> v.getId().equals("PT-LIS-A03"))
+            .findFirst()
+            .orElse(null);
+
+        VehicleResource noLongerAvailablResource = vehiclesDifference
+                .getNoLongerAvailable()
+                .getVehicles()
+                .stream().filter(v -> v.getId().equals("PT-LIS-A02"))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(newResource);
+        assertNotNull(noLongerAvailablResource);
     }
 
     private Vehicles buildNewVehicles() {

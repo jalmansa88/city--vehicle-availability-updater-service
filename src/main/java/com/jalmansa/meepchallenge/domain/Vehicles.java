@@ -23,12 +23,12 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Vehicles {
 
-    private Set<VehicleResource> availableVehicles;
+    private Set<VehicleResource> vehicles;
 
     public static Vehicles of(VehicleResource[] vehiclesArray) {
         HashSet<VehicleResource> set = Optional.ofNullable(vehiclesArray)
-            .map(Sets::newHashSet)
-            .orElseGet(HashSet::new);
+                .map(Sets::newHashSet)
+                .orElseGet(HashSet::new);
 
         return of(set);
     }
@@ -39,30 +39,49 @@ public class Vehicles {
 
         return Vehicles
                 .builder()
-                .availableVehicles(set)
+                .vehicles(set)
                 .build();
     }
 
     @JsonIgnore
     public boolean isEmpty() {
-        return CollectionUtils.isEmpty(availableVehicles);
+        return CollectionUtils.isEmpty(vehicles);
     }
 
     public Optional<VehicleResource> findVehicleById(String id) {
-        return availableVehicles.stream()
-            .filter(vehicle -> vehicle.getId().equals(id))
-            .findFirst();
+        return vehicles.stream()
+                .filter(vehicle -> vehicle.getId().equals(id))
+                .findFirst();
     }
 
     public boolean isAvailable(VehicleResource resource) {
-        return availableVehicles.contains(resource);
+        return vehicles.contains(resource);
     }
 
     @Override
     public String toString() {
-        return availableVehicles
+        return vehicles
                 .stream()
                 .map(VehicleResource::toString)
                 .collect(Collectors.joining(","));
     }
+
+    @Override
+    public boolean equals(Object otherVehicles) {
+        if (otherVehicles == null || getClass() != otherVehicles.getClass()) {
+          return false;
+        }
+
+        if (this == otherVehicles) {
+            return true;
+        }
+
+        return vehicles.equals(((Vehicles) otherVehicles).getVehicles());
+    }
+
+    @Override
+    public int hashCode() {
+        return vehicles.hashCode();
+    }
+
 }
